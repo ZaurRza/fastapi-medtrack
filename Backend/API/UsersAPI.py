@@ -62,6 +62,16 @@ class UsersAPI(object):
         result=self._controller.login_user(worker_number,password)
         return result
 
+    def mobile_login_user(self,worker_number,password):
+        validation_result=self._worker_number_validate(worker_number)
+        if validation_result[0]=="ERR":
+            return validation_result
+        validation_result=self._password_validate(password)
+        if validation_result[0]=="ERR":
+            return validation_result
+        result=self._controller.mobile_login_user(worker_number,password)
+        return result
+
     def logout_user(self,worker_number):
         validation_result=self._worker_number_validate(worker_number)
         if validation_result[0]=="ERR":

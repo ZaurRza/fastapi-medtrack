@@ -97,6 +97,24 @@ class UsersController(object):
         return ("OK",200,"Успешный вход!",{"worker_number":worker_number,"role":myresult[1]})
 
     #Логаут пользователя
+    def mobile_login_user(self,worker_number,password):
+        self._logout_old_sessions()
+        mycursor = self._mydb.cursor()
+        sql = "SELECT id FROM pharmacist WHERE worker_number=%s;"
+        mycursor.execute(sql,(worker_number,))
+        myresult = mycursor.fetchone()
+        if myresult is None:
+            return ("ERR",404,"Worker number does not exist!")
+        pharmacist_id=myresult[0]
+        sql = "SELECT password,role FROM users WHERE pharmacist_id=%s;"
+        mycursor.execute(sql,(pharmacist_id,))
+        myresult = mycursor.fetchone()
+        if myresult is None:
+            return ("ERR",404,"User does not exist!")
+        if not self._check_password(password, myresult[0]):
+            return ("ERR",401,"Wrong password!")
+        return ("OK",200,"Successful mobile login!",{"worker_number":worker_number,"role":myresult[1]})
+
     def logout_user(self,worker_number):
         mycursor = self._mydb.cursor()
         sql = "SELECT id FROM pharmacist WHERE worker_number=%s;"

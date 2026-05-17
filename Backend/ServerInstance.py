@@ -108,6 +108,11 @@ def login_user(user_data: UserLogin):
     res=user_api.login_user(user_data.worker_number,user_data.password)
     return validate_res(res)
 
+@app.post("/user/mobile_login")
+def mobile_login_user(user_data: UserLogin):
+    res=user_api.mobile_login_user(user_data.worker_number,user_data.password)
+    return validate_res(res)
+
 @app.post("/user/logout")
 def logout_user(user_data: UserLogout):
     res=user_api.logout_user(user_data.worker_number)
