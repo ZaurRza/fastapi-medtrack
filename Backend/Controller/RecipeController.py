@@ -49,7 +49,7 @@ class RecipeController(object):
             if myresult[1] == '1':
                 return ("ERR",406,"Этот медикамент уже продан!")
             sql="SELECT id FROM recipe_medicament WHERE medicament_id=%s"
-            mycursor.execute(sql,myresult[0])
+            mycursor.execute(sql,(myresult[0],))
             myresult=mycursor.fetchone()
             if myresult is not None:
                 return ("ERR",406,"Этот медикамент уже в другом рецепте!")
