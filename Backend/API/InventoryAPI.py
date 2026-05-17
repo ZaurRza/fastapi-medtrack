@@ -18,6 +18,12 @@ class InventoryAPI(object):
         result=self._controller.display_all()
         return result
 
+    def get_inventory_medicament_sorted(self,name,type):
+       if name is None or name.strip()=="" or type is None or type.strip()=="":
+           return ("ERR",400,"Имя и тип не могут быть пустыми!")
+       result=self._controller.get_inventory_medicament_sorted(name,type)
+       return result
+
     def add_to_inventory(self,unical_number):
        validation_result=self._unical_number_validate(unical_number)
        if validation_result[0]=="ERR":
