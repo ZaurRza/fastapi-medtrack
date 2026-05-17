@@ -42,12 +42,11 @@ def add_to_inventory(unical_number:int):
     res=inventory_api.add_to_inventory(unical_number)
     return validate_res(res)
 
-#API Рецептов
 @app.get("/inventory/get_inventory_medicament_sorted")
 def get_inventory_medicament_sorted(name:str,type:str):
     res=inventory_api.get_inventory_medicament_sorted(name,type)
     return validate_res(res)
-
+#API Рецептов
 recipe_api=RecipeAPI.RecipeAPI()
 @app.get("/recipe/display")
 def display_recipe():
