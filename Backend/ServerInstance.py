@@ -15,6 +15,14 @@ import API.PharmacistAPI as PharmacistAPI
 import API.UsersAPI as UserAPI
 import API.MedicamentAPI as MedicamentAPI
 app = FastAPI()
+
+@app.get("/")
+def root():
+    return {
+        "status": "OK",
+        "message": "MedTrack API is running"
+    }
+
 #Функция для обработки ошибок в API
 def validate_res(res):
     if res[0]=="ERR":
