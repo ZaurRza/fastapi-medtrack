@@ -103,7 +103,7 @@ class SaleController(object):
         if myresult is None:
             return ("ERR",404,"Такого серийного номера не существует!")
         medicament_id=myresult[0]
-        sql = "SELECT id FROM recipe_medicament WHERE medicament_id=%s;"
+        sql = "SELECT recipe_id FROM recipe_medicament WHERE medicament_id=%s;"
         mycursor.execute(sql,(medicament_id,))
         myresult = mycursor.fetchone()
         #Если медикамент используется в рецепте, то ищем продажу по номеру рецепта
@@ -112,7 +112,7 @@ class SaleController(object):
             sql = "SELECT worker_number,recipe_number,sale_date,person_to FROM sale JOIN pharmacist on pharmacist.id=sale.pharmacist_id LEFT JOIN recipe on recipe.id=sale.recipe_id WHERE recipe_id=%s;"
             mycursor.execute(sql,(recipe_id,))
             myresult = mycursor.fetchall()
-            if myresult is None:
+            if not myresult:
                 return ("ERR",404,"Такой продажи не существует!")
             obj=[]
             for x in myresult:
@@ -122,7 +122,7 @@ class SaleController(object):
         sql = "SELECT worker_number,medicament.name,sale_date,person_to FROM sale JOIN pharmacist on pharmacist.id=sale.pharmacist_id LEFT JOIN medicament on medicament.id=sale.medicament_id WHERE medicament_id=%s;"
         mycursor.execute(sql,(medicament_id,))
         myresult = mycursor.fetchall()
-        if myresult is None:
+        if not myresult:
             return ("ERR",404,"Такой продажи не существует!")
         obj=[]
         for x in myresult:
