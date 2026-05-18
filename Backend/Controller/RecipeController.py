@@ -41,12 +41,12 @@ class RecipeController(object):
         if myresult is not None:
                 return ("ERR",406,"Такой рецепт уже существует!")
         for medicament in medicament_list:
-            sql="SELECT id,sold FROM medicament WHERE unical_number=%s"
+            sql="SELECT id,sold FROM inventory JOIN medicament on inventory.medicament_id=medicament.id WHERE unical_number=%s"
             mycursor.execute(sql,(medicament,))
             myresult=mycursor.fetchone()
             if myresult is None:
-                return ("ERR",404,"Такой медикамент не существует!")
-            if myresult[1] == '1':
+                return ("ERR",404,"Такой медикамент не в инвентаре!")
+            if myresult[1] == 1:
                 return ("ERR",406,"Этот медикамент уже продан!")
             sql="SELECT id FROM recipe_medicament WHERE medicament_id=%s"
             mycursor.execute(sql,(myresult[0],))
