@@ -109,7 +109,7 @@ class SaleController(object):
         #Если медикамент используется в рецепте, то ищем продажу по номеру рецепта
         if myresult is not None:
             recipe_id=myresult[0]
-            sql = "SELECT worker_number,recipe_number,sale_date,person_to FROM sale JOIN pharmacist on pharmacist.id=sale.pharmacist_id JOIN recipe on recipe.id=sale.recipe_id WHERE recipe_id=%s;"
+            sql = "SELECT worker_number,recipe_number,sale_date,person_to FROM sale JOIN pharmacist on pharmacist.id=sale.pharmacist_id LEFT JOIN recipe on recipe.id=sale.recipe_id WHERE recipe_id=%s;"
             mycursor.execute(sql,(recipe_id,))
             myresult = mycursor.fetchall()
             if myresult is None:
@@ -119,7 +119,7 @@ class SaleController(object):
                 obj.append({"worker_number":x[0],"recipe_number":x[1],"sale_date":x[2],"person_to":x[3]})
             return ("OK",201,"Успешно найдено",obj)
         #Если медикамент не используется в рецепте, то ищем продажу по серийному номеру медикамента
-        sql = "SELECT worker_number,medicament.name,sale_date,person_to FROM sale JOIN pharmacist on pharmacist.id=sale.pharmacist_id JOIN medicament on medicament.id=sale.medicament_id WHERE medicament_id=%s;"
+        sql = "SELECT worker_number,medicament.name,sale_date,person_to FROM sale JOIN pharmacist on pharmacist.id=sale.pharmacist_id LEFT JOIN medicament on medicament.id=sale.medicament_id WHERE medicament_id=%s;"
         mycursor.execute(sql,(medicament_id,))
         myresult = mycursor.fetchall()
         if myresult is None:
@@ -143,11 +143,11 @@ class SaleController(object):
         myresult = mycursor.fetchone()
         if myresult is None:
             return ("ERR",404,"Такой продажи не существует!")
-        sql = "SELECT worker_number,recipe_number,sale_date,person_to FROM sale JOIN pharmacist on pharmacist.id=sale.pharmacist_id JOIN recipe on recipe.id=sale.recipe_id WHERE recipe_id=%s;"
+        sql = "SELECT worker_number,recipe_number,sale_date,person_to FROM sale JOIN pharmacist on pharmacist.id=sale.pharmacist_id LEFT JOIN recipe on recipe.id=sale.recipe_id WHERE recipe_id=%s;"
         mycursor.execute(sql,(recipe_id,))
         myresult = mycursor.fetchall()
         obj=[]
-        sql="SELECT name FROM medicament JOIN recipe_medicament on medicament.id=recipe_medicament.medicament_id WHERE recipe_medicament.recipe_id=%s"
+        sql="SELECT name FROM medicament LEFT JOIN recipe_medicament on medicament.id=recipe_medicament.medicament_id WHERE recipe_medicament.recipe_id=%s"
         mycursor.execute(sql,(recipe_id,))
         meds=mycursor.fetchall()
         for x in myresult:
