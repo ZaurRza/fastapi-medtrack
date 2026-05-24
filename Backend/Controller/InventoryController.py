@@ -8,7 +8,7 @@ class InventoryController(object):
     #Получение всех медикаментов в инвентаре
     def display_all(self):
         mycursor=self._mydb.cursor()
-        sql = "SELECT medicament_id,name,price,arrival_date,unical_number FROM inventory JOIN medicament on inventory.medicament_id=medicament.id;"
+        sql = "SELECT medicament_id,name,price,arrival_date,unical_number FROM inventory JOIN medicament on inventory.medicament_id=medicament.id WHERE medicament.sold=0;"
         mycursor.execute(sql)
         myresult = mycursor.fetchall()
         obj=[]
