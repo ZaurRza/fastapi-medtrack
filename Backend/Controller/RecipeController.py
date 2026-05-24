@@ -24,7 +24,7 @@ class RecipeController(object):
         if myresult is None:
             return ("ERR",404,"Такого рецепта не существует!")
         recipe_id=myresult[0]
-        sql= "SELECT name,unical_number,organization ,doctor,patient ,recipe_needed FROM(SELECT recipe_id,name,unical_number,recipe_needed FROM recipe_medicament JOIN medicament on medicament_id=medicament.id WHERE recipe_id=%s) rm JOIN recipe on recipe.id=rm.recipe_id;"
+        sql= "SELECT rm.name,rm.unical_number,recipe.organization,recipe.doctor,recipe.patient,rm.recipe_needed FROM(SELECT recipe_medicament.recipe_id,medicament.name,medicament.unical_number,medicament.recipe_needed FROM recipe_medicament JOIN medicament on recipe_medicament.medicament_id=medicament.id WHERE recipe_medicament.recipe_id=%s) rm JOIN recipe on recipe.id=rm.recipe_id;"
         mycursor.execute(sql,(recipe_id,))
         myresult = mycursor.fetchall()
         obj=[]
@@ -41,7 +41,7 @@ class RecipeController(object):
         if myresult is not None:
                 return ("ERR",406,"Такой рецепт уже существует!")
         for medicament in medicament_list:
-            sql="SELECT id,sold FROM inventory JOIN medicament on inventory.medicament_id=medicament.id WHERE unical_number=%s"
+            sql="SELECT medicament.id,medicament.sold FROM inventory JOIN medicament on inventory.medicament_id=medicament.id WHERE medicament.unical_number=%s"
             mycursor.execute(sql,(medicament,))
             myresult=mycursor.fetchone()
             if myresult is None:

@@ -27,7 +27,7 @@ class UsersController(object):
     def display_all(self):
         self._logout_old_sessions()
         mycursor = self._mydb.cursor()
-        sql = "SELECT users.id,name,worker_number,role,is_online,last_log FROM users JOIN pharmacist ON users.pharmacist_id = pharmacist.id;"
+        sql = "SELECT users.id,pharmacist.name,pharmacist.worker_number,users.role,users.is_online,users.last_log FROM users JOIN pharmacist ON users.pharmacist_id = pharmacist.id;"
         mycursor.execute(sql)
         myresult = mycursor.fetchall()
         obj=[]
