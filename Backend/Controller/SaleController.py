@@ -1,12 +1,16 @@
-from DatabaseConnection import DatabaseConnection
+﻿from DatabaseConnection import DatabaseConnection
 class SaleController(object):
     """Класс для реализации логики продаж"""
     def __init__(self):
-        self._mydb = DatabaseConnection().connect()
+        self._db = DatabaseConnection()
+
+    def _cursor(self):
+        mydb=self._db.connect()
+        return mydb,mydb.cursor()
 #Реализация логики
     #Получение всех продаж
     def display_all(self):
-        mycursor = self._mydb.cursor()
+        mydb,mycursor = self._cursor()
         sql = "SELECT medicament.unical_number,pharmacist.worker_number,recipe.recipe_number,sale.sale_date FROM sale LEFT JOIN medicament ON medicament.id = sale.medicament_id JOIN pharmacist ON pharmacist.id = sale.pharmacist_id LEFT JOIN recipe ON recipe.id = sale.recipe_id;"
         mycursor.execute(sql)
         myresult = mycursor.fetchall()
@@ -17,7 +21,7 @@ class SaleController(object):
     
     #Добавление продажи без рецепта
     def add_sale_only_medicament(self,unical_number,worker_number,person):
-        mycursor = self._mydb.cursor()
+        mydb,mycursor = self._cursor()
         sql = "SELECT id,recipe_needed FROM medicament WHERE unical_number=%s;"
         mycursor.execute(sql,(unical_number,))
         myresult = mycursor.fetchone()
@@ -49,18 +53,18 @@ class SaleController(object):
             return ("ERR",406,"Такая продажа уже существует!")
         sql= "INSERT INTO sale (pharmacist_id,medicament_id,sale_date,person_to) VALUES (%s,%s,NOW(),%s)"
         mycursor.execute(sql,(pharmacist_id,medicament_id,person))
-        self._mydb.commit()
+        mydb.commit()
         sql="UPDATE medicament SET sold='1' WHERE id=%s"
         mycursor.execute(sql,(medicament_id,))
-        self._mydb.commit()
+        mydb.commit()
         sql="DELETE FROM inventory WHERE medicament_id=%s"
         mycursor.execute(sql,(medicament_id,))
-        self._mydb.commit()
+        mydb.commit()
         return ("OK",201,"Успешно записано",{"unical_number":unical_number,"worker_number":worker_number,"person":person})
     
     #Добавление продажи с рецептом
     def add_sale_with_recipe(self,worker_number,recipe_number,person):
-        mycursor = self._mydb.cursor()
+        mydb,mycursor = self._cursor()
         sql = "SELECT id FROM pharmacist WHERE worker_number=%s;"
         mycursor.execute(sql,(worker_number,))
         myresult = mycursor.fetchone()
@@ -80,7 +84,7 @@ class SaleController(object):
             return ("ERR",406,"Такая продажа уже существует!")
         sql= "INSERT INTO sale (pharmacist_id,recipe_id,sale_date,person_to) VALUES (%s,%s,NOW(),%s)"
         mycursor.execute(sql,(pharmacist_id,recipe_id,person))
-        self._mydb.commit()
+        mydb.commit()
         sql="SELECT medicament_id FROM recipe_medicament WHERE recipe_id=%s"
         mycursor.execute(sql,(recipe_id,)) 
         myresult = mycursor.fetchall()
@@ -88,15 +92,15 @@ class SaleController(object):
             medicament_id=x[0]
             sql="DELETE FROM inventory WHERE medicament_id=%s"
             mycursor.execute(sql,(medicament_id,))
-            self._mydb.commit()
+            mydb.commit()
             sql="UPDATE medicament SET sold='1' WHERE id=%s"
             mycursor.execute(sql,(medicament_id,))
-            self._mydb.commit()
+            mydb.commit()
         return ("OK",201,"Успешно записано",{ "worker_number":worker_number,"recipe_number":recipe_number,"person":person })
     
     #Показать продажу по серийному номеру медикамента
     def display_sale_medicament(self,unical_number):
-        mycursor = self._mydb.cursor()
+        mydb,mycursor = self._cursor()
         sql = "SELECT id FROM medicament WHERE unical_number=%s;"
         mycursor.execute(sql,(unical_number,))
         myresult = mycursor.fetchone()
@@ -131,7 +135,7 @@ class SaleController(object):
     
     #Показать продажу по номеру рецепта
     def display_sale_recipe(self,recipe_number):
-        mycursor = self._mydb.cursor()
+        mydb,mycursor = self._cursor()
         sql = "SELECT id FROM recipe WHERE recipe_number=%s;"
         mycursor.execute(sql,(recipe_number,))
         myresult = mycursor.fetchone()
@@ -156,7 +160,7 @@ class SaleController(object):
     
     #Показать продажу по номеру работника
     def display_sale_worker(self,worker_number):
-        mycursor = self._mydb.cursor()
+        mydb,mycursor = self._cursor()
         sql = "SELECT id FROM pharmacist WHERE worker_number=%s;"
         mycursor.execute(sql,(worker_number,))
         myresult = mycursor.fetchone()

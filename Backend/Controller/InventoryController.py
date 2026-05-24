@@ -1,13 +1,17 @@
-from DatabaseConnection import DatabaseConnection
+﻿from DatabaseConnection import DatabaseConnection
 class InventoryController(object):
     """Класс для реализации логики инвентаря"""
     def __init__(self):
-        self._mydb = DatabaseConnection().connect()
+        self._db = DatabaseConnection()
+
+    def _cursor(self):
+        mydb=self._db.connect()
+        return mydb,mydb.cursor()
 
 #Реализация логики
     #Получение всех медикаментов в инвентаре
     def display_all(self):
-        mycursor=self._mydb.cursor()
+        mydb,mycursor = self._cursor()
         sql = "SELECT inventory.medicament_id,medicament.name,medicament.price,inventory.arrival_date,medicament.unical_number FROM inventory JOIN medicament on inventory.medicament_id=medicament.id WHERE medicament.sold=0;"
         mycursor.execute(sql)
         myresult = mycursor.fetchall()
@@ -16,9 +20,9 @@ class InventoryController(object):
             obj.append({"id":x[0],"name":x[1],"price":x[2],"date_arrival":x[3],"serial_num":x[4]})
         return ("OK",201,"Успешно найдено",obj)
     
-    #Добавление медикамента в инвентарь
+    #Получение медикаментов из инвентаря по имени и типу с сортировкой по сроку годности
     def get_inventory_medicament_sorted(self,name,type):
-        mycursor = self._mydb.cursor()
+        mydb,mycursor = self._cursor()
         sql = "SELECT medicament.unical_number,medicament.name,medicament.type,medicament.expiration_date FROM inventory JOIN medicament on inventory.medicament_id=medicament.id LEFT JOIN recipe_medicament on recipe_medicament.medicament_id=medicament.id WHERE medicament.name=%s AND medicament.type=%s AND medicament.sold=0 AND recipe_medicament.id IS NULL ORDER BY medicament.expiration_date ASC;"
         mycursor.execute(sql,(name,type))
         myresult = mycursor.fetchall()
@@ -28,7 +32,7 @@ class InventoryController(object):
         return ("OK",201,"Успешно найдено",obj)
 
     def add_medicament_to_inventory(self,unical_number):
-        mycursor = self._mydb.cursor()
+        mydb,mycursor = self._cursor()
         sql = "SELECT id,sold FROM medicament WHERE unical_number=%s;"
         mycursor.execute(sql,(unical_number,))
         myresult = mycursor.fetchone()
@@ -45,5 +49,5 @@ class InventoryController(object):
            return ("ERR",406,"Такой медикамент уже в инвентаре!")
         sql= "INSERT INTO inventory (medicament_id,arrival_date) VALUES (%s,NOW())"
         mycursor.execute(sql,(medicament_id,))
-        self._mydb.commit()
+        mydb.commit()
         return ("OK",201,"Успешно записано",{"medicament_id":medicament_id})

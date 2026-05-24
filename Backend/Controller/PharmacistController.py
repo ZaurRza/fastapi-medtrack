@@ -1,12 +1,16 @@
-from DatabaseConnection import DatabaseConnection
+﻿from DatabaseConnection import DatabaseConnection
 class ClassControllerPharmacist(object):
     """Класс для реализации логики фармацевтов"""
     def __init__(self):
-        self._mydb = DatabaseConnection().connect()
+        self._db = DatabaseConnection()
+
+    def _cursor(self):
+        mydb=self._db.connect()
+        return mydb,mydb.cursor()
 #Реализация логики
     #Получение всех фармацевтов
     def display_all(self):
-        mycursor = self._mydb.cursor()
+        mydb,mycursor = self._cursor()
         sql="SELECT * FROM pharmacist;"
         mycursor.execute(sql)
         myresult = mycursor.fetchall()
@@ -17,7 +21,7 @@ class ClassControllerPharmacist(object):
     
     #Добавление фармацевта
     def add_pharmacist(self,name,worker_number):
-        mycursor = self._mydb.cursor()
+        mydb,mycursor = self._cursor()
         sql = "SELECT id FROM pharmacist WHERE worker_number=%s;"
         mycursor.execute(sql,(worker_number,))
         myresult = mycursor.fetchone()
@@ -25,12 +29,12 @@ class ClassControllerPharmacist(object):
             return ("ERR",406,"Такой номер работника уже существует!")
         sql="INSERT INTO pharmacist (name,worker_number) VALUES (%s,%s)"
         mycursor.execute(sql,(name,worker_number))
-        self._mydb.commit()
+        mydb.commit()
         return ("OK",201,"Успешно записано",{"name":name,"worker_number":worker_number})
     
     #Удаление фармацевта
     def delete_pharmacist(self,worker_number):
-        mycursor = self._mydb.cursor()
+        mydb,mycursor = self._cursor()
         sql = "SELECT id FROM pharmacist WHERE worker_number=%s;"
         mycursor.execute(sql,(worker_number,))
         myresult = mycursor.fetchone()
@@ -38,5 +42,5 @@ class ClassControllerPharmacist(object):
             return ("ERR",404,"Такого номера работника не существует!")
         sql="DELETE FROM pharmacist WHERE worker_number=%s"
         mycursor.execute(sql,(worker_number,))
-        self._mydb.commit()
+        mydb.commit()
         return ("OK",200,"Успешно удалено",{"worker_number":worker_number})

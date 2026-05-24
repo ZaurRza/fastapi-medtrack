@@ -1,12 +1,16 @@
-from DatabaseConnection import DatabaseConnection
+﻿from DatabaseConnection import DatabaseConnection
 class RecipeController(object):
     """Класс для реализации логики рецептов"""
     def __init__(self):
-        self._mydb = DatabaseConnection().connect()
+        self._db = DatabaseConnection()
+
+    def _cursor(self):
+        mydb=self._db.connect()
+        return mydb,mydb.cursor()
 #Реализация логики
     #Получение всех рецептов
     def display_all(self):
-        mycursor = self._mydb.cursor()
+        mydb,mycursor = self._cursor()
         sql = "SELECT DISTINCT recipe_number,organization,doctor,patient,recipe_date FROM recipe;"
         mycursor.execute(sql)
         myresult = mycursor.fetchall()
@@ -17,7 +21,7 @@ class RecipeController(object):
 
     #Получение рецепта по номеру
     def display_recipe_exact(self,recipe_number):
-        mycursor = self._mydb.cursor()
+        mydb,mycursor = self._cursor()
         sql = "SELECT id,recipe_number FROM recipe WHERE recipe_number = %s"
         mycursor.execute(sql,(recipe_number,))
         myresult = mycursor.fetchone()
@@ -34,7 +38,7 @@ class RecipeController(object):
 
     #Добавление рецепта
     def add_recipe(self,recipe_number,organization,doctor,patient,recipe_date,medicament_list):
-        mycursor = self._mydb.cursor()
+        mydb,mycursor = self._cursor()
         sql="SELECT id FROM recipe WHERE recipe_number=%s"
         mycursor.execute(sql,(recipe_number,))
         myresult=mycursor.fetchone()
@@ -55,7 +59,7 @@ class RecipeController(object):
                 return ("ERR",406,"Этот медикамент уже в другом рецепте!")
         sql="INSERT INTO recipe (organization,doctor,patient,recipe_number,recipe_date) VALUES (%s,%s,%s,%s,%s)"
         mycursor.execute(sql,(organization,doctor,patient,recipe_number,recipe_date))
-        self._mydb.commit()
+        mydb.commit()
         recipe_id=mycursor.lastrowid
         medicaments_recipe_id=[]
         for number in medicament_list:
@@ -65,12 +69,12 @@ class RecipeController(object):
             medicaments_recipe_id.append((recipe_id,myresult[0]))
         sql="INSERT INTO recipe_medicament (recipe_id,medicament_id) VALUES (%s,%s)"
         mycursor.executemany(sql,medicaments_recipe_id)
-        self._mydb.commit()
+        mydb.commit()
         return ("OK",200,"Рецепт успешно добавлен!",{"recipe_id": recipe_id})
     
     #Удаление рецепта
     def delete_recipe(self,recipe_number):  
-        mycursor = self._mydb.cursor()
+        mydb,mycursor = self._cursor()
         sql="SELECT id FROM recipe WHERE recipe_number=%s"
         mycursor.execute(sql,(recipe_number,))
         myresult=mycursor.fetchone()
@@ -79,5 +83,5 @@ class RecipeController(object):
         recipe_id=myresult[0]
         sql="DELETE FROM recipe WHERE id=%s"
         mycursor.execute(sql,(recipe_id,))
-        self._mydb.commit()
+        mydb.commit()
         return ("OK",200,"Рецепт успешно удалён!",{"recipe_id": recipe_id})

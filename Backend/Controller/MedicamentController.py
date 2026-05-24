@@ -1,10 +1,15 @@
-from DatabaseConnection import DatabaseConnection
+﻿from DatabaseConnection import DatabaseConnection
 class MedicamentController(object):
     """Класс для реализации логики медикаментов"""
     def __init__(self):
-        self._mydb = DatabaseConnection().connect()
+        self._db = DatabaseConnection()
+
+    def _cursor(self):
+        mydb=self._db.connect()
+        return mydb,mydb.cursor()
+
     def recipe_check(self, medicament_id):
-        mycursor = self._mydb.cursor()
+        mydb,mycursor = self._cursor()
         sql = "SELECT id FROM recipe_medicament WHERE medicament_id=%s;"
         mycursor.execute(sql,(medicament_id,))
         myresult = mycursor.fetchone()
@@ -14,7 +19,7 @@ class MedicamentController(object):
 #Реализация логики
     #Получение всех медикаментов
     def display_all(self):
-        mycursor=self._mydb.cursor()
+        mydb,mycursor = self._cursor()
         sql = "SELECT name,price,unical_number,production_date,expiration_date,production_country,type,recipe_needed FROM medicament;"
         mycursor.execute(sql)
         myresult = mycursor.fetchall()
@@ -25,7 +30,7 @@ class MedicamentController(object):
     
     #Добавление медикамента
     def add_medicament(self,name,price,unical_number,production_date,expiration_date,production_country,type,recipe_needed):
-        mycursor = self._mydb.cursor()
+        mydb,mycursor = self._cursor()
         sql = "SELECT id FROM medicament WHERE unical_number=%s;"
         mycursor.execute(sql,(unical_number,))
         myresult = mycursor.fetchone()
@@ -33,12 +38,12 @@ class MedicamentController(object):
             return ("ERR",406,"Такой серийный номер уже существует!")
         sql= "INSERT INTO medicament (name,price,unical_number,production_date,expiration_date,production_country,type,recipe_needed) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)"
         mycursor.execute(sql,(name,price,unical_number,production_date,expiration_date,production_country,type,recipe_needed))
-        self._mydb.commit()
+        mydb.commit()
         return ("OK",201,"Успешно записано",{"name":name,"price":price,"unical_number":unical_number,"production_date":production_date,"expiration_date":expiration_date,"production_country":production_country,"type":type,"recipe_needed":recipe_needed})
     
     #Удаление медикамента
     def delete_medicament(self,unical_number):
-        mycursor = self._mydb.cursor()
+        mydb,mycursor = self._cursor()
         sql = "SELECT id FROM medicament WHERE unical_number=%s;"
         mycursor.execute(sql,(unical_number,))
         myresult = mycursor.fetchone()
@@ -49,12 +54,12 @@ class MedicamentController(object):
             return ("ERR",406,"Невозможно удалить медикамент, так как он используется в рецепте!")
         sql= "DELETE FROM medicament WHERE id=%s"
         mycursor.execute(sql,(medicament_id,))
-        self._mydb.commit()
+        mydb.commit()
         return ("OK",200,"Успешно удалено",{"unical_number":unical_number})
     
     #Получение медикамента по серийному номеру
     def display_medicament_exact(self,unical_number):
-        mycursor = self._mydb.cursor()
+        mydb,mycursor = self._cursor()
         sql = "SELECT name,price,unical_number,production_date,expiration_date,production_country,type,recipe_needed FROM medicament WHERE unical_number=%s;"
         mycursor.execute(sql,(unical_number,))
         myresult = mycursor.fetchone()
@@ -65,7 +70,7 @@ class MedicamentController(object):
     
     #Изменение медикамента
     def change_medicament(self,name,price,unical_number,production_date,expiration_date,production_country,type,recipe_needed):
-        mycursor = self._mydb.cursor()
+        mydb,mycursor = self._cursor()
         sql = "SELECT id FROM medicament WHERE unical_number=%s;"
         mycursor.execute(sql,(unical_number,))
         myresult = mycursor.fetchone()
@@ -73,6 +78,6 @@ class MedicamentController(object):
             return ("ERR",404,"Такого серийного номера не существует!")
         sql= "UPDATE medicament SET name=%s,price=%s,production_date=%s,expiration_date=%s,production_country=%s,type=%s,recipe_needed=%s WHERE unical_number=%s"
         mycursor.execute(sql,(name,price,production_date,expiration_date,production_country,type,recipe_needed,unical_number))
-        self._mydb.commit()
+        mydb.commit()
         return ("OK",200,"Успешно изменено",{"name":name,"price":price,"unical_number":unical_number,"production_date":production_date,"expiration_date":expiration_date,"production_country":production_country,"type":type,"recipe_needed":recipe_needed})
     
